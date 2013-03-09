@@ -70,9 +70,10 @@ endif
 
 TARGET_NO_UNDEFINED_LDFLAGS := -Wl,--no-undefined
 
-TARGET_arm_CFLAGS :=    -O2 \
+TARGET_arm_CFLAGS :=    -Os \
                         -fomit-frame-pointer \
                         -fstrict-aliasing    \
+						-fno-zero-initialized-in-bss \
                         -funswitch-loops
 
 # Modules can choose to compile some source as thumb. As
@@ -81,7 +82,7 @@ TARGET_arm_CFLAGS :=    -O2 \
 # compiled as ARM.
 ifeq ($(ARCH_ARM_HAVE_THUMB_SUPPORT),true)
 TARGET_thumb_CFLAGS :=  -mthumb \
-                        -Os \
+                        -O3 \
                         -fomit-frame-pointer \
                         -fno-strict-aliasing
 else
