@@ -54,7 +54,7 @@ echo " "
 busybox sleep 1
 echo "Building!"
 echo " "
-#make -j${JOBS}
+make -j${JOBS}
 
 echo " "	
 echo "----------------------------------------"
