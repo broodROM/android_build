@@ -92,6 +92,8 @@ else
 	rm -Rf ${ARIESVEDIR}/META-INF
 	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${ARIESVEDIR}/META-INF
 fi;
+echo "Removing DownloadProviderUi.apk
+rm -f ${ARIESVEDIR}/system/app/DownloadProviderUi.apk
 
 
 echo " "	
