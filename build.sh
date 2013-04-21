@@ -92,8 +92,6 @@ else
 	rm -Rf ${ARIESVEDIR}/META-INF
 	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${ARIESVEDIR}/META-INF
 fi;
-echo "Removing DownloadProviderUi.apk
-rm -f ${ARIESVEDIR}/system/app/DownloadProviderUi.apk
 
 
 echo " "	
@@ -194,6 +192,13 @@ if [[ "$BUILDODIN" == "1" ]]; then
         echo " "    
 	md5sum -t broodROM-Release-4.tar >> broodROM-Release-4.tar
 	mv broodROM-Release-4.tar ${HOMEDIR}/broodROM-Release-4.tar.md5
+        echo "Cleaning remains..."
+        echo " "  
+        rm -f ${HOMEDIR}/cache.img 
+        rm -Rf ${ARIESVEDIR}/autobuild
+        rm -Rf ${ARIESVEDIR}/autobuildodin
+        rm -Rf ${ARIESVEDIR}/META-INF
+        echo " "
 	echo " ---------------------------------------------"	
 	echo " - Odin package creation done!               -"
 	echo " - Odin One package can be found in root     -"
