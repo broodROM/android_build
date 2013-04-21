@@ -19,14 +19,12 @@ PRODUCT_DEVICE := generic
 PRODUCT_NAME := core
 
 PRODUCT_PACKAGES := \
-    ApplicationsProvider \
     BackupRestoreConfirmation \
     Browser \
     Contacts \
     ContactsProvider \
     DefaultContainerService \
     DownloadProvider \
-    DownloadProviderUi \
     HTMLViewer \
     Home \
     KeyChain \
