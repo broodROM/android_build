@@ -7,7 +7,7 @@ ui_print("        www.broodplank.net            ");
 ui_print("   Created by broodplank1337 @ XDA    ");
 ui_print("                                      ");
 ui_print(" - Powered by:                        ");
-ui_print("    broodKernel OC/UV v3.3            ");
+ui_print("    broodKernel OC/UV v3.4            ");
 ui_print("                                      ");
 ui_print(" - Based on:                          ");
 ui_print("    Android v4.1.2 / CM10             ");
@@ -135,7 +135,6 @@ symlink("toolbox", "/system/bin/cat", "/system/bin/chmod",
 ui_print(" ");
 ui_print(" - Setting permissions");
 set_perm_recursive(0, 0, 0755, 0644, "/system");
-set_perm_recursive(0, 0, 0755, 0755, "/system/addon.d");
 set_perm_recursive(0, 2000, 0755, 0755, "/system/bin");
 set_perm(0, 3003, 02750, "/system/bin/netcfg");
 set_perm(0, 3004, 02755, "/system/bin/ping");
