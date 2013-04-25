@@ -1,28 +1,36 @@
 #!/bin/bash
 
 # ---------------------------------------------------------
-# Copyright 2013 broodplank.net
-# REV3 (Release 4)
+# >>> Init Vars
+  HOMEDIR=${PWD}
+  ARIESVEDIR=${HOMEDIR}/out/target/product/ariesve
+  RELEASENAME="broodROM-JB-Release-4.zip"
 # ---------------------------------------------------------
 
-# Init Vars
-HOMEDIR=${PWD}
-ARIESVEDIR=${HOMEDIR}/out/target/product/ariesve
-RELEASENAME="broodROM-JB-Release-4.zip"
+# ---------------------------------------------------------
+# >>> broodROM Jellybean Automated Build Script
+# >>> Copyright 2013 broodplank.net
+# >>> REV4 (Release 4)
+# ---------------------------------------------------------
+
+# ---------------------------------------------------------
+# >>> Check for updates before starting?
+#
+  CHECKUPDATES=0        # 0 to disable, 1 for repo sync
+# ---------------------------------------------------------
 
 # ---------------------------------------------------------
 #
-# BUILD CONFIG
+# >>> BUILD CONFIG
 #
 # ---------------------------------------------------------
 #
-# Main Configuration
+# >>> Main Configuration
 #
-  MAKEPARAM=""           # Example: MAKEPARAM="-k" 
   JOBS=5                 # CPU Cores + 1 (also hyperthreading)
   INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
 #
-# Odin Configuration
+# >>> Odin Configuration
 # All files besides system.img, boot.img, reovery.img and cache.img
 # should be placed in build/broodrom/odin to be included if 1 (below)
 #
@@ -45,6 +53,14 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 2
 
+
+if [[ "$CHECKUPDATES" == "1" ]]; then
+       echo "----------------------------------------"
+       echo "- Syncing repositories...              -"
+       echo "----------------------------------------"
+       repo sync
+       clear
+fi;
 
 echo " "	
 echo "----------------------------------------"
