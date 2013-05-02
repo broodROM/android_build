@@ -407,7 +407,7 @@ if [[ "$BUILDODIN" == "1" ]]; then
 	cp ${ARIESVEDIR}/system/etc/broodrom/boot_ocuv.img ${ARIESVEDIR}/autobuildodin/boot.img
 	cp ${ARIESVEDIR}/recovery.img ${ARIESVEDIR}/autobuildodin/recovery.img
         echo "Creating empty cache file"
-	dd if=/dev/zero of=${ARIESVE3DIR}/autobuildodin/cache.img bs=1K count=102400
+	dd if=/dev/zero of=${ARIESVEDIR}/autobuildodin/cache.img bs=1K count=102400
 		if [[ "$ODINADDMODEM" == "1" ]]; then
 			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${ARIESVEDIR}/autobuildodin/amss.mbn
 			$ODINMODEM = "amss.mbn"
