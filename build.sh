@@ -13,7 +13,7 @@
 # ---------------------------------------------------------
 # >>> broodROM Jellybean Automated Build Script
 # >>> Copyright 2013 broodplank.net
-# >>> REV5 BETA (Release 4)
+# >>> REV6 BETA (Release 4)
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
@@ -28,10 +28,12 @@
 #
 # ---------------------------------------------------------
 #
-# >>> Main Configuration (intended for option 6 (AIO) 
+# >>> Main Configuration (intended for option 6, All-In-One) 
 #
   JOBS=5                 # CPU Cores + 1 (also hyperthreading)
   INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
+  INCLUDEGAPPS=0         # Include Lite version of GAPPS 
+                         # Only for personal use! Distribution is strictly prohibited!
 #
 # >>> Odin Configuration
 # All files besides system.img, boot.img, reovery.img and cache.img
@@ -52,7 +54,9 @@ echo " "
 echo "----------------------------------------"
 echo "-     broodROM Jellybean Release 4     -"
 echo "-          Auto build script           -"
-echo "-       Version: Revision 5 BETA       -"
+echo "-       Version: Revision 6 BETA       -"
+echo "-                                      -"
+echo "-         www.broodplank.net           -"
 echo "----------------------------------------"
 echo " "
 echo "Please make your choice:"
@@ -69,7 +73,7 @@ echo " If option 6 is chosen, please open the build.sh script"
 echo " in the source root and adjust the variables to your needs"
 echo " "
 echo " [x] Exit"
-    echo " "
+echo " "
 
 
 }
@@ -87,8 +91,9 @@ echo "- Syncing repositories...              -"
 echo "----------------------------------------"
 repo sync
 clear
-
 ;;
+
+
 "2")
 clear
 echo " "	
@@ -115,9 +120,9 @@ busybox sleep 1
 echo "Building!"
 echo " "
 make -j${JOBS} ${MAKEPARAM}
-
-
 ;;
+
+
 "3")
 clear
 echo " "	
@@ -145,8 +150,6 @@ echo "Building!"
 echo " "
 make otatools -j${JOBS}
 make recoveryimage -j${JOBS}
-
-
 ;; 
 
 "4")
@@ -203,23 +206,21 @@ echo "-     Signing final OTA zip file       -"
 echo "----------------------------------------"
 echo " "
 busybox sleep 1
-
 cd ${HOMEDIR}/build/broodrom
 echo "Signing, please wait..."
 java -jar signapk.jar testkey.x509.pem testkey.pk8 ${RELEASENAME} signed-${RELEASENAME}
 mv -f signed-${RELEASENAME} ${HOMEDIR}/signed-${RELEASENAME}
 rm -f ${RELEASENAME}
 echo "Signing done!" 
-
-
 echo " "
 echo " "
 echo " ---------------------------------------------"	
 echo " - CWM Zip creation process completed        -"
 echo " - Signed Zip can be found in root folder    -"
 echo " ---------------------------------------------"
-
 ;;
+
+
 "5")
 clear
 rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
@@ -276,9 +277,8 @@ rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
         busybox sleep 1
 ;;
 
+
 "6")
-
-
 if [[ "$CHECKUPDATES" == "1" ]]; then
        echo "----------------------------------------"
        echo "- Syncing repositories...              -"
@@ -333,7 +333,10 @@ else
 	rm -Rf ${ARIESVEDIR}/META-INF
 	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${ARIESVEDIR}/META-INF
 fi;
-
+if [[ "$INCLUDEGAPPS" == "1" ]]; then
+    echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
+    cp -Rf ${HOMEDIR}/build/broodrom/gapps ${ARIESVEDIR}/system
+fi;
 
 echo " "	
 echo "----------------------------------------"
@@ -373,8 +376,6 @@ java -jar signapk.jar testkey.x509.pem testkey.pk8 ${RELEASENAME} signed-${RELEA
 mv -f signed-${RELEASENAME} ${HOMEDIR}/signed-${RELEASENAME}
 rm -f ${RELEASENAME}
 echo "Signing done!" 
-
-
 echo " "
 echo " "
 echo " ---------------------------------------------"	
@@ -449,9 +450,12 @@ if [[ "$BUILDODIN" == "1" ]]; then
 fi;
 ;;
 
+
 "x")
 exit
 ;;
+
+
 esac
 
 done
