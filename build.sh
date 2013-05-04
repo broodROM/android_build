@@ -335,7 +335,7 @@ else
 fi;
 if [[ "$INCLUDEGAPPS" == "1" ]]; then
     echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
-    cp -Rf ${HOMEDIR}/build/broodrom/gapps ${ARIESVEDIR}/system
+    cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${ARIESVEDIR}/system/
 fi;
 
 echo " "	
