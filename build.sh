@@ -5,15 +5,13 @@
   HOMEDIR=${PWD}
   ARIESVEDIR=${HOMEDIR}/out/target/product/ariesve
   RELEASENAME="broodROM-JB-Release-4.zip"
+  CPUCOUNT=`cat /proc/cpuinfo | grep processor | wc -l`;
 # ---------------------------------------------------------
-
-# TODO: Add ota scripts for recovery package only 
-# TODO: Recheck the whole script
 
 # ---------------------------------------------------------
 # >>> broodROM Jellybean Automated Build Script
 # >>> Copyright 2013 broodplank.net
-# >>> REV6 BETA (Release 4)
+# >>> REV6 (Release 4)
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
@@ -30,7 +28,7 @@
 #
 # >>> Main Configuration (intended for option 6, All-In-One) 
 #
-  JOBS=5                 # CPU Cores + 1 (also hyperthreading)
+  JOBS=${CPUCOUNT}+1     # CPU Cores + 1 (also hyperthreading)
   INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
   INCLUDEGAPPS=0         # Include Lite version of GAPPS 
                          # Only for personal use! Distribution is strictly prohibited!
