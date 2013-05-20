@@ -5,7 +5,7 @@
   HOMEDIR=${PWD}
   ARIESVEDIR=${HOMEDIR}/out/target/product/ariesve
   RELEASENAME="broodROM-JB-Release-4.zip"
-  CPUCOUNT=`cat /proc/cpuinfo | grep processor | wc -l`;
+  #CPUCOUNT=`cat /proc/cpuinfo | grep processor | wc -l`;
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
@@ -28,7 +28,7 @@
 #
 # >>> Main Configuration (intended for option 6, All-In-One) 
 #
-  JOBS=${CPUCOUNT}+1     # CPU Cores + 1 (also hyperthreading)
+  JOBS=5                 # CPU Cores + 1 (also hyperthreading)
   INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
   INCLUDEGAPPS=0         # Include Lite version of GAPPS 
                          # Only for personal use! Distribution is strictly prohibited!
