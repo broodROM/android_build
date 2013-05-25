@@ -3,7 +3,6 @@
 # ---------------------------------------------------------
 # >>> Init Vars
   HOMEDIR=${PWD}
-  RELEASENAME="broodROM-JB-Release-4.zip"
   # JOBS=`cat /proc/cpuinfo | grep processor | wc -l`;
   # If you uncomment the "JOBS" var make sure you comment the 
   # "JOBS" var down below in the build config
@@ -29,11 +28,13 @@
 #
 # >>> Main Configuration (intended for option 6, All-In-One) 
 #
-  JOBS=5                # CPU Cores + 1 (also hyperthreading)
+  JOBS=5                 # CPU Cores + 1 (also hyperthreading)
   INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
   INCLUDEGAPPS=0         # Include Lite version of GAPPS 
                          # Only for personal use! Distribution is strictly prohibited!
-#
+  USEOTAPACKAGE=0        # Use 'make otapackage' instead of fetching META-INF from vendor
+                         # Set it to '1' when your device is not yet officially supported
+
 # >>> Odin Configuration
 # All files besides system.img, boot.img, reovery.img and cache.img
 # should be placed in build/broodrom/odin to be included if 1 (below)
@@ -64,23 +65,21 @@ echo ${TARGET_PRODUCT} | sed -e 's/full_//g' > ./currentdevice
 export DEVICE=`cat ./currentdevice`;
 rm -f ./currentdevice
 TARGETDIR=${HOMEDIR}/out/target/product/${DEVICE}
+RELEASENAME="broodROM-JB-Release-4-${DEVICE}.zip"
 
 
 
 
 ShowMenu () {
 clear
-echo " "	
 echo "----------------------------------------"
-echo "-     broodROM Jellybean Release 4     -"
-echo "-          Auto build script           -"
-echo "-       Version: Revision 7            -"
-echo "-                                      -"
+echo "-         BROODROM JELLYBEAN           -"
+echo "----------------------------------------"
 echo "-         www.broodplank.net           -"
 echo "----------------------------------------"
 echo " "
-echo ">> Chosen target device: ${DEVICE}"
-echo ">> Number of simultaneous jobs: ${JOBS}"
+echo ">>> Selected target device: ${DEVICE}"
+echo ">>> Number of simultaneous jobs: ${JOBS}"
 echo " "
 echo "Please make your choice:"
 echo " "
@@ -176,71 +175,78 @@ make recoveryimage -j${JOBS}
 ;; 
 
 "4")
-echo " "	
-echo "----------------------------------------"
-echo "-       Manipulating output...         -"
-echo "----------------------------------------"
-echo " "
-busybox sleep 1
-echo "Replacing contents of xbin"
-rm -Rf ${TARGETDIR}/system/xbin
-cp -Rf ${HOMEDIR}/build/broodrom/xbin ${TARGETDIR}/system/xbin
-echo "Replacing kernel"
-cp -f ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/boot.img
-if [[ "$INCLUDERECOVERY" == "1" ]]; then
-	echo "Placing META-INF folder"
-	rm -Rf ${TARGETDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${TARGETDIR}/META-INF
-else
-	echo "Placing META-INF folder"
-	rm -Rf ${TARGETDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
+if [[ "$USEOTAPACKAGE" == "1" ]]; then
+	make otapackage -j ${JOBS}
+	echo "---------------------------------------------"	
+	echo "- CWM Zip creation process completed        -"
+	echo "- Zip can be found out/target/device folder -"
+	echo "---------------------------------------------"
+else 
+	echo " "	
+	echo "----------------------------------------"
+	echo "-       Manipulating output...         -"
+	echo "----------------------------------------"
+	echo " "
+	busybox sleep 1
+	echo "Replacing contents of xbin"
+	rm -Rf ${TARGETDIR}/system/xbin
+	cp -Rf ${HOMEDIR}/build/broodrom/xbin ${TARGETDIR}/system/xbin
+	echo "Replacing kernel"
+	cp -f ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/boot.img
+	if [[ "$INCLUDERECOVERY" == "1" ]]; then
+		echo "Placing META-INF folder"
+		rm -Rf ${TARGETDIR}/META-INF
+		cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${TARGETDIR}/META-INF
+	else
+		echo "Placing META-INF folder"
+		rm -Rf ${TARGETDIR}/META-INF
+		cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
+	fi;
+
+	echo " "	
+	echo "----------------------------------------"
+	echo "-     Packing final OTA zip file       -"
+	echo "----------------------------------------"
+	echo " "
+	busybox sleep 1
+	echo "Preparing zip contents:"
+	cd ${TARGETDIR}
+	rm -Rf autobuild
+	mkdir autobuild
+	echo "Copy boot.img"
+	cp boot.img autobuild/boot.img
+	if [[ "$INCLUDERECOVERY" == "1" ]]; then
+	echo "Copy recovery.img"
+	cp -f recovery.img autobuild/recovery.img
+	fi;
+	echo "Copy system folder"
+	cp -R system autobuild/system
+	echo "Copy META-INF folder"
+	cp -R META-INF autobuild/META-INF
+	cd autobuild
+	echo "Zipping all"
+	zip -r ${RELEASENAME} .
+	mv -f ${RELEASENAME} ${HOMEDIR}/build/broodrom/${RELEASENAME}
+
+	echo " "	
+	echo "----------------------------------------"
+	echo "-     Signing final OTA zip file       -"
+	echo "----------------------------------------"
+	echo " "
+	busybox sleep 1
+	cd ${HOMEDIR}/build/broodrom
+	echo "Signing, please wait..."
+	java -jar signapk.jar testkey.x509.pem testkey.pk8 ${RELEASENAME} signed-${RELEASENAME}
+	mv -f signed-${RELEASENAME} ${HOMEDIR}/signed-${RELEASENAME}
+	rm -f ${RELEASENAME}
+	echo "Signing done!" 
+	echo " "
+	echo " "
+	echo "---------------------------------------------"	
+	echo "- CWM Zip creation process completed        -"
+	echo "- Signed Zip can be found in root folder    -"
+	echo "---------------------------------------------"
 fi;
-
-
-echo " "	
-echo "----------------------------------------"
-echo "-     Packing final OTA zip file       -"
-echo "----------------------------------------"
-echo " "
-busybox sleep 1
-echo "Preparing zip contents:"
-cd ${TARGETDIR}
-rm -Rf autobuild
-mkdir autobuild
-echo "Copy boot.img"
-cp boot.img autobuild/boot.img
-if [[ "$INCLUDERECOVERY" == "1" ]]; then
-echo "Copy recovery.img"
-cp -f recovery.img autobuild/recovery.img
-fi;
-echo "Copy system folder"
-cp -R system autobuild/system
-echo "Copy META-INF folder"
-cp -R META-INF autobuild/META-INF
-cd autobuild
-echo "Zipping all"
-zip -r ${RELEASENAME} .
-mv -f ${RELEASENAME} ${HOMEDIR}/build/broodrom/${RELEASENAME}
-
-echo " "	
-echo "----------------------------------------"
-echo "-     Signing final OTA zip file       -"
-echo "----------------------------------------"
-echo " "
-busybox sleep 1
-cd ${HOMEDIR}/build/broodrom
-echo "Signing, please wait..."
-java -jar signapk.jar testkey.x509.pem testkey.pk8 ${RELEASENAME} signed-${RELEASENAME}
-mv -f signed-${RELEASENAME} ${HOMEDIR}/signed-${RELEASENAME}
-rm -f ${RELEASENAME}
-echo "Signing done!" 
-echo " "
-echo " "
-echo "---------------------------------------------"	
-echo "- CWM Zip creation process completed        -"
-echo "- Signed Zip can be found in root folder    -"
-echo "---------------------------------------------"
 ;;
 
 
@@ -336,75 +342,79 @@ echo "Building!"
 echo " "
 make -j${JOBS} ${MAKEPARAM}
 
-echo " "	
-echo "----------------------------------------"
-echo "-       Manipulating output...         -"
-echo "----------------------------------------"
-echo " "
-busybox sleep 1
-echo "Replacing contents of xbin"
-rm -Rf ${TARGETDIR}/system/xbin
-cp -Rf ${HOMEDIR}/build/broodrom/xbin ${TARGETDIR}/system/xbin
-echo "Replacing kernel"
-cp -f ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/boot.img
-if [[ "$INCLUDERECOVERY" == "1" ]]; then
-	echo "Placing META-INF folder"
-	rm -Rf ${TARGETDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${TARGETDIR}/META-INF
-else
-	echo "Placing META-INF folder"
-	rm -Rf ${TARGETDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
-fi;
-if [[ "$INCLUDEGAPPS" == "1" ]]; then
-    echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
-    cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${TARGETDIR}/system/
+if [[ "$USEOTAPACKAGE" == "1" ]]; then
+	make otapackage -j ${JOBS}
+	echo "---------------------------------------------"	
+	echo "- CWM Zip creation process completed        -"
+	echo "- Zip can be found out/target/device folder -"
+	echo "---------------------------------------------"
+else 
+	echo " "	
+	echo "----------------------------------------"
+	echo "-       Manipulating output...         -"
+	echo "----------------------------------------"
+	echo " "
+	busybox sleep 1
+	echo "Replacing contents of xbin"
+	rm -Rf ${TARGETDIR}/system/xbin
+	cp -Rf ${HOMEDIR}/build/broodrom/xbin ${TARGETDIR}/system/xbin
+	echo "Replacing kernel"
+	cp -f ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/boot.img
+	if [[ "$INCLUDERECOVERY" == "1" ]]; then
+		echo "Placing META-INF folder"
+		rm -Rf ${TARGETDIR}/META-INF
+		cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${TARGETDIR}/META-INF
+	else
+		echo "Placing META-INF folder"
+		rm -Rf ${TARGETDIR}/META-INF
+		cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
+	fi;
+
+	echo " "	
+	echo "----------------------------------------"
+	echo "-     Packing final OTA zip file       -"
+	echo "----------------------------------------"
+	echo " "
+	busybox sleep 1
+	echo "Preparing zip contents:"
+	cd ${TARGETDIR}
+	rm -Rf autobuild
+	mkdir autobuild
+	echo "Copy boot.img"
+	cp boot.img autobuild/boot.img
+	if [[ "$INCLUDERECOVERY" == "1" ]]; then
+	echo "Copy recovery.img"
+	cp -f recovery.img autobuild/recovery.img
+	fi;
+	echo "Copy system folder"
+	cp -R system autobuild/system
+	echo "Copy META-INF folder"
+	cp -R META-INF autobuild/META-INF
+	cd autobuild
+	echo "Zipping all"
+	zip -r ${RELEASENAME} .
+	mv -f ${RELEASENAME} ${HOMEDIR}/build/broodrom/${RELEASENAME}
+
+	echo " "	
+	echo "----------------------------------------"
+	echo "-     Signing final OTA zip file       -"
+	echo "----------------------------------------"
+	echo " "
+	busybox sleep 1
+	cd ${HOMEDIR}/build/broodrom
+	echo "Signing, please wait..."
+	java -jar signapk.jar testkey.x509.pem testkey.pk8 ${RELEASENAME} signed-${RELEASENAME}
+	mv -f signed-${RELEASENAME} ${HOMEDIR}/signed-${RELEASENAME}
+	rm -f ${RELEASENAME}
+	echo "Signing done!" 
+	echo " "
+	echo " "
+	echo "---------------------------------------------"	
+	echo "- CWM Zip creation process completed        -"
+	echo "- Signed Zip can be found in root folder    -"
+	echo "---------------------------------------------"
 fi;
 
-echo " "	
-echo "----------------------------------------"
-echo "-     Packing final OTA zip file       -"
-echo "----------------------------------------"
-echo " "
-busybox sleep 1
-echo "Preparing zip contents:"
-cd ${TARGETDIR}
-rm -Rf autobuild
-mkdir autobuild
-echo "Copy boot.img"
-cp boot.img autobuild/boot.img
-if [[ "$INCLUDERECOVERY" == "1" ]]; then
-echo "Copy recovery.img"
-cp -f recovery.img autobuild/recovery.img
-fi;
-echo "Copy system folder"
-cp -R system autobuild/system
-echo "Copy META-INF folder"
-cp -R META-INF autobuild/META-INF
-cd autobuild
-echo "Zipping all"
-zip -r ${RELEASENAME} .
-mv -f ${RELEASENAME} ${HOMEDIR}/build/broodrom/${RELEASENAME}
-
-echo " "	
-echo "----------------------------------------"
-echo "-     Signing final OTA zip file       -"
-echo "----------------------------------------"
-echo " "
-busybox sleep 1
-
-cd ${HOMEDIR}/build/broodrom
-echo "Signing, please wait..."
-java -jar signapk.jar testkey.x509.pem testkey.pk8 ${RELEASENAME} signed-${RELEASENAME}
-mv -f signed-${RELEASENAME} ${HOMEDIR}/signed-${RELEASENAME}
-rm -f ${RELEASENAME}
-echo "Signing done!" 
-echo " "
-echo " "
-echo "---------------------------------------------"	
-echo "- CWM Zip creation process completed        -"
-echo "- Signed Zip can be found in root folder    -"
-echo "---------------------------------------------"
 
 busybox sleep 3
 
