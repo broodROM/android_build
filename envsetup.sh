@@ -445,24 +445,21 @@ function add_lunch_combo()
     LUNCH_MENU_CHOICES=(${LUNCH_MENU_CHOICES[@]} $new_combo)
 }
 
-# add the default one here
-add_lunch_combo full-eng
-add_lunch_combo full_x86-eng
-add_lunch_combo vbox_x86-eng
+
 
 function print_lunch_menu()
 {
     local uname=$(uname)
-    echo
-    echo "You're building on" $uname
     if [ "$(uname)" = "Darwin" ] ; then
        echo "  (ohai, koush!)"
     fi
     echo
     if [ "z${CM_DEVICES_ONLY}" != "z" ]; then
-       echo "Breakfast menu... pick a combo:"
+       echo "Devices:"
+       echo
     else
-       echo "Lunch menu... pick a combo:"
+       echo "Devices:"
+       echo
     fi
 
     local i=1
@@ -498,7 +495,7 @@ function breakfast()
     target=$1
     CM_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
-    add_lunch_combo full-eng
+
     for f in `/bin/ls vendor/cm/vendorsetup.sh 2> /dev/null`
         do
             echo "including $f"
@@ -532,7 +529,7 @@ function lunch()
         answer=$1
     else
         print_lunch_menu
-        echo -n "Which would you like? [full-eng] "
+        echo -n "Select device: "
         read answer
     fi
 

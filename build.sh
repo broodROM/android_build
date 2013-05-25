@@ -3,15 +3,17 @@
 # ---------------------------------------------------------
 # >>> Init Vars
   HOMEDIR=${PWD}
-  ARIESVEDIR=${HOMEDIR}/out/target/product/ariesve
+  ${DEVICE}DIR=${HOMEDIR}/out/target/product/${DEVICE}
   RELEASENAME="broodROM-JB-Release-4.zip"
-  #CPUCOUNT=`cat /proc/cpuinfo | grep processor | wc -l`;
+  # JOBS=`cat /proc/cpuinfo | grep processor | wc -l`;
+  # If you uncomment the "JOBS" var make sure you comment the 
+  # "JOBS" var down below in the build config
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
 # >>> broodROM Jellybean Automated Build Script
 # >>> Copyright 2013 broodplank.net
-# >>> REV6 (Release 4)
+# >>> REV7 (Release 4)
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
@@ -28,7 +30,7 @@
 #
 # >>> Main Configuration (intended for option 6, All-In-One) 
 #
-  JOBS=5                 # CPU Cores + 1 (also hyperthreading)
+  JOBS=5                # CPU Cores + 1 (also hyperthreading)
   INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
   INCLUDEGAPPS=0         # Include Lite version of GAPPS 
                          # Only for personal use! Distribution is strictly prohibited!
@@ -37,7 +39,7 @@
 # All files besides system.img, boot.img, reovery.img and cache.img
 # should be placed in build/broodrom/odin to be included if 1 (below)
 #
-  BUILDODIN=1            # If 1, an odin package will be created
+  BUILDODIN=0            # If 1, an odin package will be created
                          # If 0, all options below will be ignored
   ODINADDMODEM=0         # Add amss.mbn (modem) to odin package
   ODINADDBOOT=0          # Add adsp.mbn, dbl.mbn, osbl.mbn (bootloader)
@@ -45,17 +47,40 @@
 #
 # ---------------------------------------------------------
 
-ShowMenu () {
+
+. build/envsetup.sh
 clear
+
+
+echo "----------------------------------------"
+echo "-         BROODROM JELLYBEAN           -"
+echo "----------------------------------------"
+echo " "
+echo " >>> Please choose target device"
+
+lunch 
+clear
+
+echo ${TARGET_PRODUCT} | sed -e 's/full_//g' > ./currentdevice
+export DEVICE=`cat ./currentdevice`;
+rm -f ./currentdevice
+
+
+
+
+ShowMenu () {
 clear
 echo " "	
 echo "----------------------------------------"
 echo "-     broodROM Jellybean Release 4     -"
 echo "-          Auto build script           -"
-echo "-       Version: Revision 6 BETA       -"
+echo "-       Version: Revision 7            -"
 echo "-                                      -"
 echo "-         www.broodplank.net           -"
 echo "----------------------------------------"
+echo " "
+echo ">> Chosen target device: ${DEVICE}"
+echo ">> Number of simultaneous jobs: ${JOBS}"
 echo " "
 echo "Please make your choice:"
 echo " "
@@ -104,10 +129,10 @@ echo "Loading initial environment setup"
 echo " "
 . build/envsetup.sh
 echo " "
-echo "Ordering full_ariesve-userdebug for lunch"
+echo "Ordering full_${DEVICE}-userdebug for lunch"
 echo "Ignore the dependencies not found warning"
 echo " "
-lunch full_ariesve-userdebug
+lunch full_${DEVICE}-userdebug
 echo " "	
 echo "----------------------------------------"
 echo "-    Compiling broodROM Jellybean      -"
@@ -133,10 +158,10 @@ echo "Loading initial environment setup"
 echo " "
 . build/envsetup.sh
 echo " "
-echo "Ordering full_ariesve-userdebug for lunch"
+echo "Ordering full_${DEVICE}-userdebug for lunch"
 echo "Ignore the dependencies not found warning"
 echo " "
-lunch full_ariesve-userdebug
+lunch full_${DEVICE}-userdebug
 echo " "	
 echo "----------------------------------------"
 echo "-        Compiling broodRecovery       -"
@@ -158,18 +183,18 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Replacing contents of xbin"
-rm -Rf ${ARIESVEDIR}/system/xbin
-cp -Rf ${HOMEDIR}/build/broodrom/xbin ${ARIESVEDIR}/system/xbin
+rm -Rf ${${DEVICE}DIR}/system/xbin
+cp -Rf ${HOMEDIR}/build/broodrom/xbin ${${DEVICE}DIR}/system/xbin
 echo "Replacing kernel"
-cp -f ${ARIESVEDIR}/system/etc/broodrom/boot_ocuv.img ${ARIESVEDIR}/boot.img
+cp -f ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/boot.img
 if [[ "$INCLUDERECOVERY" == "1" ]]; then
 	echo "Placing META-INF folder"
-	rm -Rf ${ARIESVEDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${ARIESVEDIR}/META-INF
+	rm -Rf ${${DEVICE}DIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${${DEVICE}DIR}/META-INF
 else
 	echo "Placing META-INF folder"
-	rm -Rf ${ARIESVEDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${ARIESVEDIR}/META-INF
+	rm -Rf ${${DEVICE}DIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${${DEVICE}DIR}/META-INF
 fi;
 
 
@@ -180,7 +205,7 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Preparing zip contents:"
-cd ${ARIESVEDIR}
+cd ${${DEVICE}DIR}
 rm -Rf autobuild
 mkdir autobuild
 echo "Copy boot.img"
@@ -222,7 +247,7 @@ echo " ---------------------------------------------"
 "5")
 clear
 rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
-        rm -Rf ${ARIESVEDIR}/autobuildodin
+        rm -Rf ${${DEVICE}DIR}/autobuildodin
 	echo " "	
 	echo "----------------------------------------"
 	echo "-        Building Odin Package         -"
@@ -237,32 +262,32 @@ rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
 	busybox sleep 5
         echo "Preparing files for packaging"
         echo " "
-	rm -Rf ${ARIESVEDIR}/autobuildodin
-	mkdir ${ARIESVEDIR}/autobuildodin
-	cp ${ARIESVEDIR}/system.img ${ARIESVEDIR}/autobuildodin/system.img
-	cp ${ARIESVEDIR}/system/etc/broodrom/boot_ocuv.img ${ARIESVEDIR}/autobuildodin/boot.img
-	cp ${ARIESVEDIR}/recovery.img ${ARIESVEDIR}/autobuildodin/recovery.img
+	rm -Rf ${${DEVICE}DIR}/autobuildodin
+	mkdir ${${DEVICE}DIR}/autobuildodin
+	cp ${${DEVICE}DIR}/system.img ${${DEVICE}DIR}/autobuildodin/system.img
+	cp ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/autobuildodin/boot.img
+	cp ${${DEVICE}DIR}/recovery.img ${${DEVICE}DIR}/autobuildodin/recovery.img
         echo "Creating empty cache file"
-	dd if=/dev/zero of=${ARIESVEDIR}/autobuildodin/cache.img bs=1K count=102400
+	dd if=/dev/zero of=${${DEVICE}DIR}/autobuildodin/cache.img bs=1K count=102400
 		if [[ "$ODINADDMODEM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${ARIESVEDIR}/autobuildodin/amss.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${${DEVICE}DIR}/autobuildodin/amss.mbn
 			$ODINMODEM = "amss.mbn"
 		fi;
 		if [[ "$ODINADDBOOT" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${ARIESVEDIR}/autobuildodin/adsp.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${ARIESVEDIR}/autobuildodin/osbl.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${ARIESVEDIR}/autobuildodin/dbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${${DEVICE}DIR}/autobuildodin/adsp.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${${DEVICE}DIR}/autobuildodin/osbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${${DEVICE}DIR}/autobuildodin/dbl.mbn
             $ODINBOOT = "adsp.mbn osbl.mbn dbl.mbn"
 		fi;
 		if [[ "$ODINADDPRAM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${ARIESVEDIR}/autobuildodin/EMMCBOOT.MBN
-			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${ARIESVEDIR}/autobuildodin/partition.bin
+			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${${DEVICE}DIR}/autobuildodin/EMMCBOOT.MBN
+			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${${DEVICE}DIR}/autobuildodin/partition.bin
             $ODINPARAM = "EMMCBOOT.MBN partition.bin"
 		fi;
 	echo " "
         echo "Packing odin files"
         echo " "
-	cd ${ARIESVEDIR}/autobuildodin
+	cd ${${DEVICE}DIR}/autobuildodin
 	tar -c boot.img recovery.img system.img cache.img ${ODINMODEM} ${ODINBOOT} ${ODINPARAM} > broodROM-Release-4.tar
 	echo " "
         echo "Adding MD5 Sums"
@@ -295,10 +320,10 @@ echo "Loading initial environment setup"
 echo " "
 . build/envsetup.sh
 echo " "
-echo "Ordering full_ariesve-userdebug for lunch"
+echo "Ordering full_${DEVICE}-userdebug for lunch"
 echo "Ignore the dependencies not found warning"
 echo " "
-lunch full_ariesve-userdebug
+lunch full_${DEVICE}-userdebug
 
 echo " "	
 echo "----------------------------------------"
@@ -318,22 +343,22 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Replacing contents of xbin"
-rm -Rf ${ARIESVEDIR}/system/xbin
-cp -Rf ${HOMEDIR}/build/broodrom/xbin ${ARIESVEDIR}/system/xbin
+rm -Rf ${${DEVICE}DIR}/system/xbin
+cp -Rf ${HOMEDIR}/build/broodrom/xbin ${${DEVICE}DIR}/system/xbin
 echo "Replacing kernel"
-cp -f ${ARIESVEDIR}/system/etc/broodrom/boot_ocuv.img ${ARIESVEDIR}/boot.img
+cp -f ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/boot.img
 if [[ "$INCLUDERECOVERY" == "1" ]]; then
 	echo "Placing META-INF folder"
-	rm -Rf ${ARIESVEDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${ARIESVEDIR}/META-INF
+	rm -Rf ${${DEVICE}DIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${${DEVICE}DIR}/META-INF
 else
 	echo "Placing META-INF folder"
-	rm -Rf ${ARIESVEDIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${ARIESVEDIR}/META-INF
+	rm -Rf ${${DEVICE}DIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${${DEVICE}DIR}/META-INF
 fi;
 if [[ "$INCLUDEGAPPS" == "1" ]]; then
     echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
-    cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${ARIESVEDIR}/system/
+    cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${${DEVICE}DIR}/system/
 fi;
 
 echo " "	
@@ -343,7 +368,7 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Preparing zip contents:"
-cd ${ARIESVEDIR}
+cd ${${DEVICE}DIR}
 rm -Rf autobuild
 mkdir autobuild
 echo "Copy boot.img"
@@ -385,7 +410,7 @@ busybox sleep 3
 
 if [[ "$BUILDODIN" == "1" ]]; then
 	rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
-        rm -Rf ${ARIESVEDIR}/autobuildodin
+        rm -Rf ${${DEVICE}DIR}/autobuildodin
 	echo " "	
 	echo "----------------------------------------"
 	echo "-     Performing Additional Tasks      -"
@@ -400,32 +425,32 @@ if [[ "$BUILDODIN" == "1" ]]; then
 	busybox sleep 5
         echo "Preparing files for packaging"
         echo " "
-	rm -Rf ${ARIESVEDIR}/autobuildodin
-	mkdir ${ARIESVEDIR}/autobuildodin
-	cp ${ARIESVEDIR}/system.img ${ARIESVEDIR}/autobuildodin/system.img
-	cp ${ARIESVEDIR}/system/etc/broodrom/boot_ocuv.img ${ARIESVEDIR}/autobuildodin/boot.img
-	cp ${ARIESVEDIR}/recovery.img ${ARIESVEDIR}/autobuildodin/recovery.img
+	rm -Rf ${${DEVICE}DIR}/autobuildodin
+	mkdir ${${DEVICE}DIR}/autobuildodin
+	cp ${${DEVICE}DIR}/system.img ${${DEVICE}DIR}/autobuildodin/system.img
+	cp ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/autobuildodin/boot.img
+	cp ${${DEVICE}DIR}/recovery.img ${${DEVICE}DIR}/autobuildodin/recovery.img
         echo "Creating empty cache file"
-	dd if=/dev/zero of=${ARIESVEDIR}/autobuildodin/cache.img bs=1K count=102400
+	dd if=/dev/zero of=${${DEVICE}DIR}/autobuildodin/cache.img bs=1K count=102400
 		if [[ "$ODINADDMODEM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${ARIESVEDIR}/autobuildodin/amss.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${${DEVICE}DIR}/autobuildodin/amss.mbn
 			$ODINMODEM = "amss.mbn"
 		fi;
 		if [[ "$ODINADDBOOT" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${ARIESVEDIR}/autobuildodin/adsp.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${ARIESVEDIR}/autobuildodin/osbl.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${ARIESVEDIR}/autobuildodin/dbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${${DEVICE}DIR}/autobuildodin/adsp.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${${DEVICE}DIR}/autobuildodin/osbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${${DEVICE}DIR}/autobuildodin/dbl.mbn
             $ODINBOOT = "adsp.mbn osbl.mbn dbl.mbn"
 		fi;
 		if [[ "$ODINADDPRAM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${ARIESVEDIR}/autobuildodin/EMMCBOOT.MBN
-			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${ARIESVEDIR}/autobuildodin/partition.bin
+			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${${DEVICE}DIR}/autobuildodin/EMMCBOOT.MBN
+			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${${DEVICE}DIR}/autobuildodin/partition.bin
             $ODINPARAM = "EMMCBOOT.MBN partition.bin"
 		fi;
 	echo " "
         echo "Packing odin files"
         echo " "
-	cd ${ARIESVEDIR}/autobuildodin
+	cd ${${DEVICE}DIR}/autobuildodin
 	tar -c boot.img recovery.img system.img cache.img ${ODINMODEM} ${ODINBOOT} ${ODINPARAM} > broodROM-Release-4.tar
 	echo " "
         echo "Adding MD5 Sums"
@@ -435,9 +460,9 @@ if [[ "$BUILDODIN" == "1" ]]; then
         echo "Cleaning remains..."
         echo " "  
         rm -f ${HOMEDIR}/cache.img 
-        rm -Rf ${ARIESVEDIR}/autobuild
-        rm -Rf ${ARIESVEDIR}/autobuildodin
-        rm -Rf ${ARIESVEDIR}/META-INF
+        rm -Rf ${${DEVICE}DIR}/autobuild
+        rm -Rf ${${DEVICE}DIR}/autobuildodin
+        rm -Rf ${${DEVICE}DIR}/META-INF
         echo " "
 	echo " ---------------------------------------------"	
 	echo " - Odin package creation done!               -"
