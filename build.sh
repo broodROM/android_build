@@ -3,7 +3,6 @@
 # ---------------------------------------------------------
 # >>> Init Vars
   HOMEDIR=${PWD}
-  TARGETDIR=${HOMEDIR}/out/target/product/${DEVICE}
   RELEASENAME="broodROM-JB-Release-4.zip"
   # JOBS=`cat /proc/cpuinfo | grep processor | wc -l`;
   # If you uncomment the "JOBS" var make sure you comment the 
@@ -64,6 +63,7 @@ clear
 echo ${TARGET_PRODUCT} | sed -e 's/full_//g' > ./currentdevice
 export DEVICE=`cat ./currentdevice`;
 rm -f ./currentdevice
+TARGETDIR=${HOMEDIR}/out/target/product/${DEVICE}
 
 
 
@@ -237,10 +237,10 @@ rm -f ${RELEASENAME}
 echo "Signing done!" 
 echo " "
 echo " "
-echo " ---------------------------------------------"	
-echo " - CWM Zip creation process completed        -"
-echo " - Signed Zip can be found in root folder    -"
-echo " ---------------------------------------------"
+echo "---------------------------------------------"	
+echo "- CWM Zip creation process completed        -"
+echo "- Signed Zip can be found in root folder    -"
+echo "---------------------------------------------"
 ;;
 
 
@@ -401,10 +401,10 @@ rm -f ${RELEASENAME}
 echo "Signing done!" 
 echo " "
 echo " "
-echo " ---------------------------------------------"	
-echo " - CWM Zip creation process completed        -"
-echo " - Signed Zip can be found in root folder    -"
-echo " ---------------------------------------------"
+echo "---------------------------------------------"	
+echo "- CWM Zip creation process completed        -"
+echo "- Signed Zip can be found in root folder    -"
+echo "---------------------------------------------"
 
 busybox sleep 3
 
