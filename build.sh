@@ -3,7 +3,7 @@
 # ---------------------------------------------------------
 # >>> Init Vars
   HOMEDIR=${PWD}
-  ${DEVICE}DIR=${HOMEDIR}/out/target/product/${DEVICE}
+  TARGETDIR=${HOMEDIR}/out/target/product/${DEVICE}
   RELEASENAME="broodROM-JB-Release-4.zip"
   # JOBS=`cat /proc/cpuinfo | grep processor | wc -l`;
   # If you uncomment the "JOBS" var make sure you comment the 
@@ -183,18 +183,18 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Replacing contents of xbin"
-rm -Rf ${${DEVICE}DIR}/system/xbin
-cp -Rf ${HOMEDIR}/build/broodrom/xbin ${${DEVICE}DIR}/system/xbin
+rm -Rf ${TARGETDIR}/system/xbin
+cp -Rf ${HOMEDIR}/build/broodrom/xbin ${TARGETDIR}/system/xbin
 echo "Replacing kernel"
-cp -f ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/boot.img
+cp -f ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/boot.img
 if [[ "$INCLUDERECOVERY" == "1" ]]; then
 	echo "Placing META-INF folder"
-	rm -Rf ${${DEVICE}DIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${${DEVICE}DIR}/META-INF
+	rm -Rf ${TARGETDIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${TARGETDIR}/META-INF
 else
 	echo "Placing META-INF folder"
-	rm -Rf ${${DEVICE}DIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${${DEVICE}DIR}/META-INF
+	rm -Rf ${TARGETDIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
 fi;
 
 
@@ -205,7 +205,7 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Preparing zip contents:"
-cd ${${DEVICE}DIR}
+cd ${TARGETDIR}
 rm -Rf autobuild
 mkdir autobuild
 echo "Copy boot.img"
@@ -247,7 +247,7 @@ echo " ---------------------------------------------"
 "5")
 clear
 rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
-        rm -Rf ${${DEVICE}DIR}/autobuildodin
+        rm -Rf ${TARGETDIR}/autobuildodin
 	echo " "	
 	echo "----------------------------------------"
 	echo "-        Building Odin Package         -"
@@ -262,32 +262,32 @@ rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
 	busybox sleep 5
         echo "Preparing files for packaging"
         echo " "
-	rm -Rf ${${DEVICE}DIR}/autobuildodin
-	mkdir ${${DEVICE}DIR}/autobuildodin
-	cp ${${DEVICE}DIR}/system.img ${${DEVICE}DIR}/autobuildodin/system.img
-	cp ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/autobuildodin/boot.img
-	cp ${${DEVICE}DIR}/recovery.img ${${DEVICE}DIR}/autobuildodin/recovery.img
+	rm -Rf ${TARGETDIR}/autobuildodin
+	mkdir ${TARGETDIR}/autobuildodin
+	cp ${TARGETDIR}/system.img ${TARGETDIR}/autobuildodin/system.img
+	cp ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/autobuildodin/boot.img
+	cp ${TARGETDIR}/recovery.img ${TARGETDIR}/autobuildodin/recovery.img
         echo "Creating empty cache file"
-	dd if=/dev/zero of=${${DEVICE}DIR}/autobuildodin/cache.img bs=1K count=102400
+	dd if=/dev/zero of=${TARGETDIR}/autobuildodin/cache.img bs=1K count=102400
 		if [[ "$ODINADDMODEM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${${DEVICE}DIR}/autobuildodin/amss.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${TARGETDIR}/autobuildodin/amss.mbn
 			$ODINMODEM = "amss.mbn"
 		fi;
 		if [[ "$ODINADDBOOT" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${${DEVICE}DIR}/autobuildodin/adsp.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${${DEVICE}DIR}/autobuildodin/osbl.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${${DEVICE}DIR}/autobuildodin/dbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${TARGETDIR}/autobuildodin/adsp.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${TARGETDIR}/autobuildodin/osbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${TARGETDIR}/autobuildodin/dbl.mbn
             $ODINBOOT = "adsp.mbn osbl.mbn dbl.mbn"
 		fi;
 		if [[ "$ODINADDPRAM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${${DEVICE}DIR}/autobuildodin/EMMCBOOT.MBN
-			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${${DEVICE}DIR}/autobuildodin/partition.bin
+			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${TARGETDIR}/autobuildodin/EMMCBOOT.MBN
+			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${TARGETDIR}/autobuildodin/partition.bin
             $ODINPARAM = "EMMCBOOT.MBN partition.bin"
 		fi;
 	echo " "
         echo "Packing odin files"
         echo " "
-	cd ${${DEVICE}DIR}/autobuildodin
+	cd ${TARGETDIR}/autobuildodin
 	tar -c boot.img recovery.img system.img cache.img ${ODINMODEM} ${ODINBOOT} ${ODINPARAM} > broodROM-Release-4.tar
 	echo " "
         echo "Adding MD5 Sums"
@@ -343,22 +343,22 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Replacing contents of xbin"
-rm -Rf ${${DEVICE}DIR}/system/xbin
-cp -Rf ${HOMEDIR}/build/broodrom/xbin ${${DEVICE}DIR}/system/xbin
+rm -Rf ${TARGETDIR}/system/xbin
+cp -Rf ${HOMEDIR}/build/broodrom/xbin ${TARGETDIR}/system/xbin
 echo "Replacing kernel"
-cp -f ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/boot.img
+cp -f ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/boot.img
 if [[ "$INCLUDERECOVERY" == "1" ]]; then
 	echo "Placing META-INF folder"
-	rm -Rf ${${DEVICE}DIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${${DEVICE}DIR}/META-INF
+	rm -Rf ${TARGETDIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF1 ${TARGETDIR}/META-INF
 else
 	echo "Placing META-INF folder"
-	rm -Rf ${${DEVICE}DIR}/META-INF
-	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${${DEVICE}DIR}/META-INF
+	rm -Rf ${TARGETDIR}/META-INF
+	cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
 fi;
 if [[ "$INCLUDEGAPPS" == "1" ]]; then
     echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
-    cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${${DEVICE}DIR}/system/
+    cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${TARGETDIR}/system/
 fi;
 
 echo " "	
@@ -368,7 +368,7 @@ echo "----------------------------------------"
 echo " "
 busybox sleep 1
 echo "Preparing zip contents:"
-cd ${${DEVICE}DIR}
+cd ${TARGETDIR}
 rm -Rf autobuild
 mkdir autobuild
 echo "Copy boot.img"
@@ -410,7 +410,7 @@ busybox sleep 3
 
 if [[ "$BUILDODIN" == "1" ]]; then
 	rm -Rf ${HOMEDIR}/broodROM-Release-4.tar.md5
-        rm -Rf ${${DEVICE}DIR}/autobuildodin
+        rm -Rf ${TARGETDIR}/autobuildodin
 	echo " "	
 	echo "----------------------------------------"
 	echo "-     Performing Additional Tasks      -"
@@ -425,32 +425,32 @@ if [[ "$BUILDODIN" == "1" ]]; then
 	busybox sleep 5
         echo "Preparing files for packaging"
         echo " "
-	rm -Rf ${${DEVICE}DIR}/autobuildodin
-	mkdir ${${DEVICE}DIR}/autobuildodin
-	cp ${${DEVICE}DIR}/system.img ${${DEVICE}DIR}/autobuildodin/system.img
-	cp ${${DEVICE}DIR}/system/etc/broodrom/boot_ocuv.img ${${DEVICE}DIR}/autobuildodin/boot.img
-	cp ${${DEVICE}DIR}/recovery.img ${${DEVICE}DIR}/autobuildodin/recovery.img
+	rm -Rf ${TARGETDIR}/autobuildodin
+	mkdir ${TARGETDIR}/autobuildodin
+	cp ${TARGETDIR}/system.img ${TARGETDIR}/autobuildodin/system.img
+	cp ${TARGETDIR}/system/etc/broodrom/boot_ocuv.img ${TARGETDIR}/autobuildodin/boot.img
+	cp ${TARGETDIR}/recovery.img ${TARGETDIR}/autobuildodin/recovery.img
         echo "Creating empty cache file"
-	dd if=/dev/zero of=${${DEVICE}DIR}/autobuildodin/cache.img bs=1K count=102400
+	dd if=/dev/zero of=${TARGETDIR}/autobuildodin/cache.img bs=1K count=102400
 		if [[ "$ODINADDMODEM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${${DEVICE}DIR}/autobuildodin/amss.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/amss.mbn ${TARGETDIR}/autobuildodin/amss.mbn
 			$ODINMODEM = "amss.mbn"
 		fi;
 		if [[ "$ODINADDBOOT" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${${DEVICE}DIR}/autobuildodin/adsp.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${${DEVICE}DIR}/autobuildodin/osbl.mbn
-			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${${DEVICE}DIR}/autobuildodin/dbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/adsp.mbn ${TARGETDIR}/autobuildodin/adsp.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/osbl.mbn ${TARGETDIR}/autobuildodin/osbl.mbn
+			cp ${HOMEDIR}/build/broodrom/odin/dbl.mbn ${TARGETDIR}/autobuildodin/dbl.mbn
             $ODINBOOT = "adsp.mbn osbl.mbn dbl.mbn"
 		fi;
 		if [[ "$ODINADDPRAM" == "1" ]]; then
-			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${${DEVICE}DIR}/autobuildodin/EMMCBOOT.MBN
-			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${${DEVICE}DIR}/autobuildodin/partition.bin
+			cp ${HOMEDIR}/build/broodrom/odin/EMMCBOOT.MBN ${TARGETDIR}/autobuildodin/EMMCBOOT.MBN
+			cp ${HOMEDIR}/build/broodrom/odin/partition.bin ${TARGETDIR}/autobuildodin/partition.bin
             $ODINPARAM = "EMMCBOOT.MBN partition.bin"
 		fi;
 	echo " "
         echo "Packing odin files"
         echo " "
-	cd ${${DEVICE}DIR}/autobuildodin
+	cd ${TARGETDIR}/autobuildodin
 	tar -c boot.img recovery.img system.img cache.img ${ODINMODEM} ${ODINBOOT} ${ODINPARAM} > broodROM-Release-4.tar
 	echo " "
         echo "Adding MD5 Sums"
@@ -460,9 +460,9 @@ if [[ "$BUILDODIN" == "1" ]]; then
         echo "Cleaning remains..."
         echo " "  
         rm -f ${HOMEDIR}/cache.img 
-        rm -Rf ${${DEVICE}DIR}/autobuild
-        rm -Rf ${${DEVICE}DIR}/autobuildodin
-        rm -Rf ${${DEVICE}DIR}/META-INF
+        rm -Rf ${TARGETDIR}/autobuild
+        rm -Rf ${TARGETDIR}/autobuildodin
+        rm -Rf ${TARGETDIR}/META-INF
         echo " "
 	echo " ---------------------------------------------"	
 	echo " - Odin package creation done!               -"
