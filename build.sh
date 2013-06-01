@@ -11,7 +11,7 @@
 # ---------------------------------------------------------
 # >>> broodROM Jellybean Automated Build Script
 # >>> Copyright 2013 broodplank.net
-# >>> REV7 (Release 4)
+# >>> REV8 (Release 4)
 # ---------------------------------------------------------
 
 # ---------------------------------------------------------
@@ -29,8 +29,8 @@
 # >>> Main Configuration (intended for option 6, All-In-One) 
 #
   JOBS=5                 # CPU Cores + 1 (also hyperthreading)
-  INCLUDERECOVERY=1      # Includes recovery.img in zip (0/1)
-  INCLUDEGAPPS=0         # Include Lite version of GAPPS 
+  INCLUDERECOVERY=0      # Includes recovery.img in zip (0/1)
+  INCLUDEGAPPS=1        # Include Lite version of GAPPS 
                          # Only for personal use! Distribution is strictly prohibited!
   USEOTAPACKAGE=0        # Use 'make otapackage' instead of fetching META-INF from vendor
                          # Set it to '1' when your device is not yet officially supported
@@ -202,7 +202,10 @@ else
 		rm -Rf ${TARGETDIR}/META-INF
 		cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
 	fi;
-
+	if [[ "$INCLUDEGAPPS" == "1" ]]; then
+   		echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
+    	cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${TARGETDIR}/system/
+	fi;
 	echo " "	
 	echo "----------------------------------------"
 	echo "-     Packing final OTA zip file       -"
@@ -369,6 +372,10 @@ else
 		rm -Rf ${TARGETDIR}/META-INF
 		cp -Rf ${HOMEDIR}/build/broodrom/recovery/META-INF ${TARGETDIR}/META-INF
 	fi;
+	if [[ "$INCLUDEGAPPS" == "1" ]]; then
+   		echo "Including GAPPS into system, ONLY FOR PERSONAL USE!"
+    	cp -Rf ${HOMEDIR}/build/broodrom/gapps/* ${TARGETDIR}/system/
+	fi;
 
 	echo " "	
 	echo "----------------------------------------"
@@ -493,4 +500,3 @@ esac
 
 done
 exit
-
